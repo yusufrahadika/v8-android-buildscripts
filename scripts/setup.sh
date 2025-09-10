@@ -43,7 +43,7 @@ if [[ ${PLATFORM} = "android" ]]; then
   # Patch build-deps installer for snapd not available in docker
   patch -d "${V8_DIR}" -p1 < "${PATCHES_DIR}/prebuild_no_snapd.patch"
 
-  sudo bash -c 'v8/build/install-build-deps-android.sh'
+  sudo bash -c 'v8/build/install-build-deps.sh'
   sudo apt-get -y install \
       libc6-dev \
       libc6-dev-i386 \
