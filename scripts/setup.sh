@@ -43,11 +43,8 @@ if [[ ${PLATFORM} = "android" ]]; then
   # Patch build-deps installer for snapd not available in docker
   patch -d "${V8_DIR}" -p1 < "${PATCHES_DIR}/prebuild_no_snapd.patch"
 
-  # Run Chromium's dependency installer without interactive prompts
-  sudo DEBIAN_FRONTEND=noninteractive -E bash -c 'v8/build/install-build-deps.sh --no-prompt'
-
-  # Ensure subsequent apt installs are noninteractive as well
-  sudo DEBIAN_FRONTEND=noninteractive -E apt-get -y -q install \
+  sudo bash -c 'v8/build/install-build-deps.sh'
+  sudo apt-get -y install \
       libc6-dev \
       libc6-dev-i386 \
       libc6-dev-armel-cross \
