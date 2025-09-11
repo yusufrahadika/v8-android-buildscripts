@@ -52,13 +52,13 @@ jobs:
       - name: Patch V8
         run: scripts/patch.sh android
 
-      - name: Build V8 arm
-        run: |
-          scripts/build.sh android arm
+      # - name: Build V8 arm
+      #   run: |
+      #     scripts/build.sh android arm
 
-      - name: Build V8 x86
-        run: |
-          scripts/build.sh android x86
+      # - name: Build V8 x86
+      #   run: |
+      #     scripts/build.sh android x86
 
       - name: Build V8 arm64
         run: |
