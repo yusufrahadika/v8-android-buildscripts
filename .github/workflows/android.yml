@@ -40,6 +40,10 @@ jobs:
       #     path: v8
       #     key: android-v8-${{ env.V8_VERSION }}-${{ env.CACHE_KEY_SUFFIX }}
 
+      - name: Setup keyboard configuration
+        run: |
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install keyboard-configuration
+
       - name: Setup V8 build environment
         run: |
           scripts/setup.sh -r ${{ env.V8_VERSION }} android
