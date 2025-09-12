@@ -64,9 +64,9 @@ jobs:
         run: |
           scripts/build.sh android arm64
 
-      - name: Build V8 x64
-        run: |
-          scripts/build.sh android x64
+      # - name: Build V8 x64
+      #   run: |
+      #     scripts/build.sh android x64
 
       - name: Archive
         run: |
