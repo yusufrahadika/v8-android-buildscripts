@@ -18,6 +18,12 @@ source $(dirname $0)/env.sh
 # Install NDK
 function installNDK() {
   local host_arch=$1
+
+  if [[ -d "${V8_DIR}/android-ndk-${NDK_VERSION}" ]]; then
+    echo "NDK already installed at ${V8_DIR}/android-ndk-${NDK_VERSION}"
+    return
+  fi
+
   pushd .
   cd "${V8_DIR}"
   wget -q https://dl.google.com/android/repository/android-ndk-${NDK_VERSION}-${host_arch}.zip
