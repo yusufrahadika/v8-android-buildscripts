@@ -28,7 +28,17 @@ jobs:
           sudo ln -fs /usr/share/zoneinfo/UTC /etc/localtime
           sudo apt-get update
           sudo apt-get upgrade -y
-          sudo apt-get install -y apt-utils sudo git nodejs npm wget openjdk-8-jre openjdk-8-jdk
+          sudo apt-get install -y apt-utils sudo git nodejs npm wget
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Check Java environment
+        run: |
+          echo "JAVA_HOME: $JAVA_HOME"
+          java -version
 
       - name: Export settings from npm package
         run: npm run export_npm_env
