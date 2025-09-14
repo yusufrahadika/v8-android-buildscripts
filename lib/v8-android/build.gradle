@@ -1,11 +1,16 @@
-apply plugin: 'com.android.library'
+plugins {
+    id 'com.android.library'
+    id 'maven-publish'
+}
 
 android {
-    compileSdkVersion 28
+    namespace = 'org.chromium.v8android'
+
+    compileSdk 35
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 28
+        minSdkVersion 24
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
     }
@@ -19,27 +24,39 @@ android {
 
 dependencies {}
 
-apply plugin: 'maven'
+publishing {
+    publications {
+        release(MavenPublication) {
+            from components.findByName('release')
 
-task createAAR(type: Upload) {
+            groupId = 'org.chromium'
+            artifactId = 'v8-android'
+
+            pom {
+                name = 'v8-android'
+                packaging = 'aar'
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'local'
+            url = uri(project.findProperty("distDir") ?: ".")
+        }
+    }
+}
+
+tasks.register('createAAR') {
+    dependsOn 'publishReleasePublicationToLocalRepository'
+
     def distDir = project.findProperty("distDir")
     def version = project.findProperty("version") ?: "".replaceAll("\\s", "")
 
     doFirst {
         if (!distDir) throw new RuntimeException("expecting --project-prop distDir=??? but was empty")
         if (!version) throw new RuntimeException("expecting --project-prop version=??? but was empty")
-    }
 
-    project.group = "org.chromium"
-    project.version = "${version}"
-
-    configuration = configurations.archives
-    repositories.mavenDeployer {
-        repository url: "file://${distDir}"
-        pom.project {
-            name "v8-android"
-            artifactId "v8-android"
-            packaging "aar"
-        }
+        publishing.publications.release.version = version
     }
 }
