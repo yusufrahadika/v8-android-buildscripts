@@ -20,30 +20,38 @@ android {
             jniLibs.srcDirs = ["${rootDir}/../build/lib"]
         }
     }
+
+    publishing {
+        singleVariant("release")
+    }
 }
 
 dependencies {}
 
 publishing {
-    publications {
-        release(MavenPublication) {
-            from components.findByName('release')
-
-            groupId = 'org.chromium'
-            artifactId = 'v8-android'
-            version = project.findProperty("version").replaceAll("\\s", "")
-
-            pom {
-                name = 'v8-android'
-                packaging = 'aar'
-            }
-        }
-    }
-
     repositories {
         maven {
             name = 'local'
             url = uri(project.findProperty("distDir") ?: ".")
+        }
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+
+                groupId = 'org.chromium'
+                artifactId = 'v8-android'
+                version = project.findProperty("version").replaceAll("\\s", "")
+
+                pom {
+                    name = 'v8-android'
+                    packaging = 'aar'
+                }
+            }
         }
     }
 }
