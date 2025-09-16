@@ -1,8 +1,8 @@
 diff --git a/include/v8-isolate.h b/include/v8-isolate.h
-index 32b53f1b42..1ad04ba308 100644
+index 49bb46aee3d..711bb994c57 100644
 --- a/include/v8-isolate.h
 +++ b/include/v8-isolate.h
-@@ -1601,7 +1601,7 @@ class V8_EXPORT Isolate {
+@@ -1742,7 +1742,7 @@ class V8_EXPORT Isolate {
     * sandbox, the host time zone has to be detected outside the sandbox before
     * calling DateTimeConfigurationChangeNotification function.
     */
@@ -11,7 +11,7 @@ index 32b53f1b42..1ad04ba308 100644
  
    /**
     * Notification that the embedder has changed the time zone, daylight savings
-@@ -1614,7 +1614,8 @@ class V8_EXPORT Isolate {
+@@ -1755,7 +1755,8 @@ class V8_EXPORT Isolate {
     * the performance of date operations.
     */
    void DateTimeConfigurationChangeNotification(
@@ -22,10 +22,10 @@ index 32b53f1b42..1ad04ba308 100644
    /**
     * Notification that the embedder has changed the locale. V8 keeps a cache of
 diff --git a/src/api/api.cc b/src/api/api.cc
-index f64538ec1c..8460c610c6 100644
+index 545c1093ee7..efc1bada010 100644
 --- a/src/api/api.cc
 +++ b/src/api/api.cc
-@@ -6660,6 +6660,7 @@ double v8::Date::ValueOf() const {
+@@ -8064,6 +8064,7 @@ v8::Local<v8::String> v8::Date::ToUTCString() const {
        static_cast<int>(base::TimezoneCache::TimeZoneDetection::value));
  TIME_ZONE_DETECTION_ASSERT_EQ(kSkip)
  TIME_ZONE_DETECTION_ASSERT_EQ(kRedetect)
@@ -33,7 +33,7 @@ index f64538ec1c..8460c610c6 100644
  #undef TIME_ZONE_DETECTION_ASSERT_EQ
  
  MaybeLocal<v8::RegExp> v8::RegExp::New(Local<Context> context,
-@@ -9869,12 +9870,13 @@ void Isolate::SetAllowAtomicsWait(bool allow) {
+@@ -10924,12 +10925,13 @@ void Isolate::SetAllowAtomicsWait(bool allow) {
  }
  
  void v8::Isolate::DateTimeConfigurationChangeNotification(
@@ -50,10 +50,10 @@ index f64538ec1c..8460c610c6 100644
    i_isolate->clear_cached_icu_object(
        i::Isolate::ICUObjectCacheType::kDefaultSimpleDateFormat);
 diff --git a/src/base/platform/platform-posix.h b/src/base/platform/platform-posix.h
-index 7d732b4a8f..8ed588f60e 100644
+index b9ae6cd0cb1..080ef1eb0a9 100644
 --- a/src/base/platform/platform-posix.h
 +++ b/src/base/platform/platform-posix.h
-@@ -14,7 +14,7 @@ namespace base {
+@@ -18,7 +18,7 @@ void PosixInitializeCommon(AbortMode abort_mode,
  class PosixTimezoneCache : public TimezoneCache {
   public:
    double DaylightSavingsOffset(double time_ms) override;
@@ -63,10 +63,10 @@ index 7d732b4a8f..8ed588f60e 100644
  
   protected:
 diff --git a/src/base/platform/platform-win32.cc b/src/base/platform/platform-win32.cc
-index 04ef8a30f2..baac802ce6 100644
+index 5951b0825b3..f9102bba622 100644
 --- a/src/base/platform/platform-win32.cc
 +++ b/src/base/platform/platform-win32.cc
-@@ -113,7 +113,7 @@ class WindowsTimezoneCache : public TimezoneCache {
+@@ -145,7 +145,7 @@ class WindowsTimezoneCache : public TimezoneCache {
  
    ~WindowsTimezoneCache() override {}
  
@@ -76,7 +76,7 @@ index 04ef8a30f2..baac802ce6 100644
    const char* LocalTimezone(double time) override;
  
 diff --git a/src/base/timezone-cache.h b/src/base/timezone-cache.h
-index 5b8e5a20da..c6a264f2b5 100644
+index 5b8e5a20dab..c6a264f2b54 100644
 --- a/src/base/timezone-cache.h
 +++ b/src/base/timezone-cache.h
 @@ -35,10 +35,11 @@ class TimezoneCache {
@@ -94,10 +94,10 @@ index 5b8e5a20da..c6a264f2b5 100644
    // Called when tearing down the isolate
    virtual ~TimezoneCache() = default;
 diff --git a/src/date/date.cc b/src/date/date.cc
-index 825c5040d3..c78cd6cbfa 100644
+index 483f880f7a5..3fb96d74951 100644
 --- a/src/date/date.cc
 +++ b/src/date/date.cc
-@@ -33,11 +33,12 @@ DateCache::DateCache()
+@@ -37,11 +37,12 @@ DateCache::DateCache()
            base::OS::CreateTimezoneCache()
  #endif
        ) {
@@ -112,7 +112,7 @@ index 825c5040d3..c78cd6cbfa 100644
    if (stamp_.value() >= Smi::kMaxValue) {
      stamp_ = Smi::zero();
    } else {
-@@ -58,7 +59,7 @@ void DateCache::ResetDateCache(
+@@ -62,7 +63,7 @@ void DateCache::ResetDateCache(
  #ifdef V8_INTL_SUPPORT
    }
  #endif
@@ -122,10 +122,10 @@ index 825c5040d3..c78cd6cbfa 100644
    dst_tz_name_ = nullptr;
  }
 diff --git a/src/date/date.h b/src/date/date.h
-index 1f6c79c5d4..078224103c 100644
+index 7b06e51649d..e4927f2b039 100644
 --- a/src/date/date.h
 +++ b/src/date/date.h
-@@ -46,7 +46,8 @@ class V8_EXPORT_PRIVATE DateCache {
+@@ -49,7 +49,8 @@ class V8_EXPORT_PRIVATE DateCache {
  
    // Clears cached timezone information and increments the cache stamp.
    void ResetDateCache(
@@ -136,18 +136,18 @@ index 1f6c79c5d4..078224103c 100644
    // Computes floor(time_ms / kMsPerDay).
    static int DaysFromTime(int64_t time_ms) {
 diff --git a/src/objects/intl-objects.cc b/src/objects/intl-objects.cc
-index 9b8ad9fc95..4778408edd 100644
+index a861937c1c8..11abb7c0037 100644
 --- a/src/objects/intl-objects.cc
 +++ b/src/objects/intl-objects.cc
-@@ -14,6 +14,7 @@
- #include <vector>
+@@ -13,6 +13,7 @@
  
  #include "src/api/api-inl.h"
+ #include "src/base/logging.h"
 +#include "src/base/platform/platform.h"
  #include "src/base/strings.h"
- #include "src/execution/isolate.h"
- #include "src/handles/global-handles.h"
-@@ -1859,9 +1860,11 @@ MaybeHandle<String> Intl::Normalize(Isolate* isolate, Handle<String> string,
+ #include "src/common/globals.h"
+ #include "src/date/date.h"
+@@ -2679,9 +2680,11 @@ MaybeDirectHandle<String> Intl::Normalize(Isolate* isolate,
  // functionality in a straightforward way.
  class ICUTimezoneCache : public base::TimezoneCache {
   public:
@@ -161,7 +161,7 @@ index 9b8ad9fc95..4778408edd 100644
  
    const char* LocalTimezone(double time_ms) override;
  
-@@ -1869,7 +1872,8 @@ class ICUTimezoneCache : public base::TimezoneCache {
+@@ -2689,7 +2692,8 @@ class ICUTimezoneCache : public base::TimezoneCache {
  
    double LocalTimeOffset(double time_ms, bool is_utc) override;
  
@@ -171,7 +171,7 @@ index 9b8ad9fc95..4778408edd 100644
  
   private:
    icu::TimeZone* GetTimeZone();
-@@ -1942,13 +1946,23 @@ double ICUTimezoneCache::LocalTimeOffset(double time_ms, bool is_utc) {
+@@ -2754,13 +2758,23 @@ double ICUTimezoneCache::LocalTimeOffset(double time_ms, bool is_utc) {
    return raw_offset + dst_offset;
  }
  
@@ -195,3 +195,4 @@ index 9b8ad9fc95..4778408edd 100644
 +    }
    }
  }
+ 

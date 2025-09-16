@@ -1,28 +1,30 @@
 diff --git a/BUILD.gn b/BUILD.gn
-index bca5b5356b..6e24a30cd3 100644
+index d8e73f15932..d3324c04653 100644
 --- a/BUILD.gn
 +++ b/BUILD.gn
-@@ -585,9 +585,7 @@ config("internal_config") {
+@@ -857,11 +857,7 @@ config("internal_config") {
      ":cppgc_header_features",
    ]
  
 -  if (is_component_build) {
+-    defines += [ "BUILDING_V8_SHARED_PRIVATE" ]
+-  } else if (v8_expose_public_symbols) {
 -    defines += [ "BUILDING_V8_SHARED" ]
 -  }
 +  defines += [ "BUILDING_V8_SHARED" ]
  
-   if (v8_current_cpu == "riscv64") {
-     libs = [ "atomic" ]
-@@ -4956,7 +4954,7 @@ v8_source_set("torque_ls_base") {
-   }
+   if (v8_current_cpu == "riscv64" || v8_current_cpu == "riscv32") {
+     if (!is_clang) {
+@@ -6621,7 +6617,7 @@ v8_source_set("torque_ls_base") {
+   ]
  }
  
 -v8_component("v8_libbase") {
 +v8_source_set("v8_libbase") {
    sources = [
-     "src/base/address-region.h",
-     "src/base/atomic-utils.h",
-@@ -5071,11 +5069,7 @@ v8_component("v8_libbase") {
+     "src/base/abort-mode.cc",
+     "src/base/abort-mode.h",
+@@ -6792,11 +6788,7 @@ v8_component("v8_libbase") {
  
    data_deps = []
  
@@ -35,18 +37,18 @@ index bca5b5356b..6e24a30cd3 100644
  
    if (is_posix || is_fuchsia) {
      sources += [
-@@ -5194,7 +5188,7 @@ v8_component("v8_libbase") {
-   # TODO(jochen): Add support for qnx, freebsd, openbsd, netbsd, and solaris.
+@@ -6967,7 +6959,7 @@ if (v8_use_libm_trig_functions) {
+   }
  }
  
 -v8_component("v8_libplatform") {
 +v8_source_set("v8_libplatform") {
    sources = [
-     "//base/trace_event/common/trace_event_common.h",
      "include/libplatform/libplatform-export.h",
-@@ -5225,9 +5219,7 @@ v8_component("v8_libplatform") {
- 
-   configs = [ ":internal_config_base" ]
+     "include/libplatform/libplatform.h",
+@@ -7002,9 +6994,7 @@ v8_component("v8_libplatform") {
+   v8_add_configs += [ "//build/config/compiler:thinlto_optimize_max" ]
+   v8_remove_configs += [ "//build/config/compiler:thinlto_optimize_default" ]
  
 -  if (is_component_build) {
 -    defines = [ "BUILDING_V8_PLATFORM_SHARED" ]
@@ -55,7 +57,7 @@ index bca5b5356b..6e24a30cd3 100644
  
    public_configs = [ ":libplatform_config" ]
  
-@@ -5637,6 +5629,23 @@ if (v8_enable_webassembly) {
+@@ -7452,6 +7442,23 @@ if (v8_enable_webassembly) {
    }
  }
  
@@ -80,10 +82,10 @@ index bca5b5356b..6e24a30cd3 100644
  # Executables
  #
 diff --git a/gni/v8.gni b/gni/v8.gni
-index fe445307f9..b07fb80222 100644
+index 995e14cd82d..a70fb5fcc00 100644
 --- a/gni/v8.gni
 +++ b/gni/v8.gni
-@@ -303,3 +303,12 @@ template("v8_static_library") {
+@@ -524,3 +524,12 @@ template("v8_static_library") {
      configs += invoker.configs
    }
  }

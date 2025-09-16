@@ -1,17 +1,12 @@
-diff --git a/build/install-build-deps.sh b/build/install-build-deps.sh
-index 7f07bcbf0..657f138af 100755
---- a/build/install-build-deps.sh
-+++ b/build/install-build-deps.sh
-@@ -570,9 +570,9 @@ fi
- if package_exists libinput-dev; then
-     dev_list="${dev_list} libinput-dev"
- fi
--if package_exists snapcraft; then
--    dev_list="${dev_list} snapcraft"
--fi
-+# if package_exists snapcraft; then
-+#     dev_list="${dev_list} snapcraft"
-+# fi
- 
- # Cross-toolchain strip is needed for building the sysroots.
- if package_exists binutils-arm-linux-gnueabihf; then
+diff --git a/build/install-build-deps.py b/build/install-build-deps.py
+index b743710fd..86ace51d4 100755
+--- a/build/install-build-deps.py
++++ b/build/install-build-deps.py
+@@ -588,7 +588,6 @@ def backwards_compatible_list(options):
+       "msttcorefonts",
+       "python-dev",
+       "python-setuptools",
+-      "snapcraft",
+       "ttf-dejavu-core",
+       "ttf-indic-fonts",
+       "ttf-kochi-gothic",

@@ -15,9 +15,6 @@ V8_PATCHSET_ANDROID=(
   # https://github.com/Kudo/react-native-v8/issues/37
   "custom_timezone.patch"
 
-  # Fix v8 9.7 build error
-  "v8_97_android_build_error.patch"
-
   # Fix v8 libunwind link error
   # link the libunwind from official ndk rather than the chromium's builtin toolchain
   "v8_android_unwind_link_error.patch"

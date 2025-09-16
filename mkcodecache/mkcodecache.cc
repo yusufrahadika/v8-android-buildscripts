@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "include/libplatform/libplatform.h"
+#include "include/v8-context.h"
 #include "include/v8-initialization.h"
 #include "include/v8-message.h"
 #include "include/v8-script.h"
@@ -16,8 +17,7 @@ namespace v8 {
 namespace {
 
 // Reads a file into a v8 string.
-Local<String> ReadFile(Isolate* isolate, const char* name,
-                              bool should_throw) {
+Local<String> ReadFile(Isolate *isolate, const char *name, bool should_throw) {
   std::unique_ptr<base::OS::MemoryMappedFile> file(
       base::OS::MemoryMappedFile::open(
           name, base::OS::MemoryMappedFile::FileMode::kReadOnly));
@@ -32,9 +32,10 @@ Local<String> ReadFile(Isolate* isolate, const char* name,
   }
 
   int size = static_cast<int>(file->size());
-  char* chars = static_cast<char*>(file->memory());
-  Local<String> result = String::NewFromUtf8(isolate, chars, NewStringType::kNormal, size)
-                 .ToLocalChecked();
+  char *chars = static_cast<char *>(file->memory());
+  Local<String> result =
+      String::NewFromUtf8(isolate, chars, NewStringType::kNormal, size)
+          .ToLocalChecked();
   return result;
 }
 
@@ -42,7 +43,7 @@ Local<String> ReadFile(Isolate* isolate, const char* name,
 
 } // namespace v8
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   if (argc < 2) {
     ::printf("Usage: %s script_file\n", argv[0]);
     exit(1);
@@ -57,33 +58,40 @@ int main(int argc, char** argv) {
   v8::V8::InitializeExternalStartupData(argv[0]);
 
   v8::Isolate::CreateParams createParams;
-  auto arrayBufferAllocator =
-      std::unique_ptr<v8::ArrayBuffer::Allocator>(v8::ArrayBuffer::Allocator::NewDefaultAllocator());
+  auto arrayBufferAllocator = std::unique_ptr<v8::ArrayBuffer::Allocator>(
+      v8::ArrayBuffer::Allocator::NewDefaultAllocator());
   createParams.array_buffer_allocator = arrayBufferAllocator.get();
-  v8::Isolate* isolate = v8::Isolate::New(createParams);
+  v8::Isolate *isolate = v8::Isolate::New(createParams);
   v8::HandleScope handle_scope(isolate);
-
 
   v8::Local<v8::String> source = v8::ReadFile(isolate, argv[1], false);
 
   if (argc == 2) {
-   v8::ScriptOrigin origin = v8::ScriptOrigin(isolate, v8::String::NewFromUtf8Literal(isolate, "(mkcodecache)"));
+    v8::ScriptOrigin origin = v8::ScriptOrigin(
+        v8::String::NewFromUtf8Literal(isolate, "(mkcodecache)"));
 
     v8::ScriptCompiler::Source scriptSource(source, origin);
-    // v8::Local<v8::UnboundScript> unboundScript = v8::ScriptCompiler::CompileUnboundScript(isolate, &scriptSource, v8::ScriptCompiler::kEagerCompile).ToLocalChecked();
-    v8::Local<v8::UnboundScript> unboundScript = v8::ScriptCompiler::CompileUnboundScript(isolate, &scriptSource, v8::ScriptCompiler::kNoCompileOptions).ToLocalChecked();
-    v8::ScriptCompiler::CachedData *cachedData = v8::ScriptCompiler::CreateCodeCache(unboundScript);
+    // v8::Local<v8::UnboundScript> unboundScript =
+    // v8::ScriptCompiler::CompileUnboundScript(isolate, &scriptSource,
+    // v8::ScriptCompiler::kEagerCompile).ToLocalChecked();
+    v8::Local<v8::UnboundScript> unboundScript =
+        v8::ScriptCompiler::CompileUnboundScript(
+            isolate, &scriptSource, v8::ScriptCompiler::kNoCompileOptions)
+            .ToLocalChecked();
+    v8::ScriptCompiler::CachedData *cachedData =
+        v8::ScriptCompiler::CreateCodeCache(unboundScript);
     ::printf("cache data size %d\n", cachedData->length);
 
-    FILE* file = v8::base::Fopen("v8codecache.bin", "wb");
+    FILE *file = v8::base::Fopen("v8codecache.bin", "wb");
     if (file) {
       fwrite(cachedData->data, 1, cachedData->length, file);
       v8::base::Fclose(file);
     }
   } else {
-    v8::ScriptOrigin origin = v8::ScriptOrigin(isolate, v8::String::NewFromUtf8Literal(isolate, "(mkcodecache)"));
+    v8::ScriptOrigin origin = v8::ScriptOrigin(
+        v8::String::NewFromUtf8Literal(isolate, "(mkcodecache)"));
     std::unique_ptr<v8::ScriptCompiler::CachedData> cachedData;
-    FILE* file = v8::base::Fopen("v8codecache.bin", "rb");
+    FILE *file = v8::base::Fopen("v8codecache.bin", "rb");
     if (file) {
       fseek(file, 0, SEEK_END);
       size_t size = ftell(file);
@@ -96,9 +104,8 @@ int main(int argc, char** argv) {
       v8::base::Fclose(file);
 
       cachedData = std::make_unique<v8::ScriptCompiler::CachedData>(
-        buffer,
-        static_cast<int>(size),
-        v8::ScriptCompiler::CachedData::BufferPolicy::BufferOwned);
+          buffer, static_cast<int>(size),
+          v8::ScriptCompiler::CachedData::BufferPolicy::BufferOwned);
     }
 
     auto begin = std::chrono::high_resolution_clock::now();
@@ -110,8 +117,11 @@ int main(int argc, char** argv) {
     v8::ScriptCompiler::Source scriptSource(source, origin, cachedDataPtr);
     // v8::ScriptCompiler::Source scriptSource(source, origin, nullptr);
     v8::Local<v8::Script> compiledScript;
-    if (!v8::ScriptCompiler::Compile(context, &scriptSource, v8::ScriptCompiler::kConsumeCodeCache).ToLocal(&compiledScript)) {
-    // if (!v8::ScriptCompiler::Compile(context, &scriptSource, v8::ScriptCompiler::kNoCompileOptions).ToLocal(&compiledScript)) {
+    if (!v8::ScriptCompiler::Compile(context, &scriptSource,
+                                     v8::ScriptCompiler::kConsumeCodeCache)
+             .ToLocal(&compiledScript)) {
+      // if (!v8::ScriptCompiler::Compile(context, &scriptSource,
+      // v8::ScriptCompiler::kNoCompileOptions).ToLocal(&compiledScript)) {
       ::printf("ooxx error\n");
     }
 
@@ -120,8 +130,10 @@ int main(int argc, char** argv) {
     }
 
     auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
-    ::printf("ooxx compile time: %lld\n", static_cast<long long int>(duration.count()));
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - begin);
+    ::printf("ooxx compile time: %lld\n",
+             static_cast<long long int>(duration.count()));
   }
 
   v8::V8::Dispose();
